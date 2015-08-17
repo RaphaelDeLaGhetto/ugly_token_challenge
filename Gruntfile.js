@@ -20,19 +20,6 @@ module.exports = function(grunt) {
         },
 
         /**
-         * uglify
-         */
-        uglify: {
-            options: {
-                banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
-            },
-            build: {
-                src: 'src/<%= pkg.name %>.js',
-                dest: 'build/<%= pkg.name %>.min.js'
-            }
-        },
-
-        /**
          * jasmine_node
          */
         jasmine_node: {
@@ -72,12 +59,11 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-jasmine-node');
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
 
     /**
      * Default task(s).
      */
-    grunt.registerTask('default', ['jshint', 'uglify']);
+    grunt.registerTask('default', ['jshint']);
 
     /**
      * Jasmine unit tests
