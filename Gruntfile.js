@@ -1,9 +1,23 @@
 'use strict';
+
+var	port = process.env.PORT || 3333;
+
 module.exports = function(grunt) {
 
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+
+        /**
+         * connect
+         */
+        connect: {
+            server: {
+                options: {
+                    port: port,
+                }
+            }
+        },
 
         /**
          * uglify
@@ -19,6 +33,21 @@ module.exports = function(grunt) {
         },
 
         /**
+         * jasmine_node
+         */
+        jasmine_node: {
+            options: {
+                forceExit: true,
+                host: 'http://localhost:' + port + '/',
+                match: '.',
+                matchall: false,
+                extensions: 'js',
+                specNameMatcher: 'spec'
+            },
+            all: ['spec/']
+        },
+
+        /**
          * jshint
          */
         jshint: {
@@ -31,18 +60,6 @@ module.exports = function(grunt) {
             index: {
                 src: 'index.js'
             },
-//            apps: {
-//                src: ['app/**/*.js']
-//            },
-//            config: {
-//                src: ['config/**/*.js']
-//            },
-//            lib: {
-//                src: ['lib/**/*.js']
-//            },
-//            routes: {
-//                src: ['routes/**/*.js']
-//            },
             spec: {
                 src: ['spec/**/*.js']
             },
@@ -52,12 +69,18 @@ module.exports = function(grunt) {
     /**
      * Load the plugin that provides the "uglify" task.
      */
-    grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-jasmine');
+    grunt.loadNpmTasks('grunt-contrib-connect');
+    grunt.loadNpmTasks('grunt-jasmine-node');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
 
     /**
      * Default task(s).
      */
-    grunt.registerTask('default', ['uglify']);
+    grunt.registerTask('default', ['jshint', 'uglify']);
+
+    /**
+     * Jasmine unit tests
+     */
+    grunt.registerTask('test', ['connect','jasmine_node']);
 };
