@@ -5,6 +5,12 @@ A programming exercise submitted to [peerio.com](http://peerio.com). This
 document describes how to deploy the product into a production (and
 development) environment.
 
+## Overview of enhancements
+
+- Configured GruntJS for builds, testing, and deployment
+- Declared _strict mode_
+
+
 # Update the OS
 
 The following instructions pertain to Ubuntu 14.04.
@@ -93,6 +99,20 @@ If, for some reason, it wasn't, run:
 ```
 sudo apt-get install npm
 ```
+
+## GruntJS
+
+This is required for building, testing, and deploying the
+`ugly_token_challenge` project:
+
+```
+npm install -g grunt-cli
+```
+
+
+
+
+
 
 Install Redis, node, npm. 
 
