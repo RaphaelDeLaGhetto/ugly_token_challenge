@@ -54,7 +54,7 @@ module.exports = function(grunt) {
       });
 
     /**
-     * Load the plugin that provides the "uglify" task.
+     * Load the plugins
      */
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-jasmine-node');
