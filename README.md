@@ -7,9 +7,12 @@ development) environment.
 
 ## Overview of enhancements
 
-- Configured GruntJS for builds, testing, and deployment
+- Configured GruntJS for:
+    - Builds
+    - Testing
+    - Deployment
 - Declared _strict mode_
-
+- Ensured tokens containing slashes don't break the routes
 
 # Update the OS
 
