@@ -45,6 +45,7 @@ beforeEach(function(done) {
 });
 
 afterEach(function(done) {
+    redis.del('usage:' + myPublicKeyString);
     done();
 });
 
