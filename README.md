@@ -9,7 +9,11 @@ development) environment.
 
 - Configured GruntJS for:
     - Builds
+        - Delinting
+        - Removed unused packages and variables
     - Testing
+        - jasmine-node
+        - Expanded coverage to account for public key usage and ugly tokens
     - Deployment
 - Declared _strict mode_
 - Ensured tokens containing slashes don't break the routes
