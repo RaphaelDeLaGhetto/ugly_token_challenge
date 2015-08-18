@@ -18,7 +18,7 @@ redis = require('redis').createClient();
 require('../index');
 
 /**
- * Get some tokens to play with
+ * Get some tokens to play with. This feature is tested below.
  */
 beforeEach(function(done) {
     myPublicKeyString = crypto.getPublicKeyString(myKeyPair.publicKey);

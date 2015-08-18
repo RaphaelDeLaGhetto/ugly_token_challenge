@@ -1,5 +1,4 @@
 'use strict';
-//require('./index');
 
 var port = process.env.PORT || 3333;
 

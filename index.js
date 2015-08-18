@@ -1,11 +1,7 @@
 'use strict';
 
 var express = require('express'),
-    // Not used (yet...)
-	//http = require('http'),
 	schedule = require('node-schedule'),
-    // Not used (yet...)
-	//_ = require('lodash'),
 	path = require('path'),
 	crypto = require(path.join(__dirname, 'lib', 'peerio_crypto_mod')),
 	port = process.env.PORT || 3333,
@@ -15,8 +11,6 @@ var express = require('express'),
     nacl = require('tweetnacl/nacl-fast'),
     bodyParser = require('body-parser'),
     redis = require('redis').createClient(),
-    // Not used (yet...)
-	//httpServer = http.createServer(app),
 	keys = {},
 	keyPair = nacl.box.keyPair(), 
 	v1 = express.Router();
@@ -33,16 +27,27 @@ redis.on('connect', function() {
     app.listen(port);
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
+
+    // Set default AP1 route to version 1
     app.use('/api/v1', v1);
     app.use('/api', v1);
+
+    // For server request logging
     app.use(morgan('combined'));
+
+    // This server's public/private keys (refreshed every day at 3am)
     keys.public = crypto.getPublicKeyString(keyPair.publicKey);
     keys.private = nacl.util.encodeBase64(keyPair.secretKey);
   });
 
 
 /**
+ * Encrypt the given token with the public key provided
  *
+ * @param {object} token - Contains token, nonce, and ephemeralServerPublicKey properties
+ * @param {string} userPublicKeyString
+ *
+ * @return {object} Contains encrypted token, nonce, and ephemeralServerPublicKey properties in Base64
  */
 var encryptToken = function (token, userPublicKeyString) {
 	var nonce = nacl.randomBytes(24);
@@ -62,7 +67,9 @@ var encryptToken = function (token, userPublicKeyString) {
 };
 
 /**
+ * Generate a Base64-encoded 2-byte prefixed array appended with 30 pseudo-random bytes
  *
+ * @return {string} Base64
  */
 var generateToken = function () {
 	var token = new Uint8Array(32);
@@ -74,7 +81,10 @@ var generateToken = function () {
 };
 
 /**
- * Track publicKey usage
+ * Route middleware for tracking publicKey usage. Incremement by one for every
+ * request with a _publicKey_ parameter.
+ *
+ * @version 1
  */
 v1.param('publicKey', function(req, res, next) {
 	var publicKey = req.params.publicKey;
@@ -91,7 +101,9 @@ v1.param('publicKey', function(req, res, next) {
 /**
  * Get ten encrypted tokens
  *
- * GET /api/generate/:publicKey
+ * GET /api/v1/generate/:publicKey
+ *
+ * @version 1
  */
 v1.get('/generate/:publicKey', function(req, res) {
 	var publicKey = req.params.publicKey,
@@ -114,7 +126,9 @@ v1.get('/generate/:publicKey', function(req, res) {
 /**
  * Check validity of a token
  *
- * POST /api/tokens/:token
+ * POST /api/v1/tokens/:token
+ *
+ * @version 1
  */
 v1.post('/tokens/:token*?', function(req, res) {
 
@@ -139,7 +153,7 @@ v1.post('/tokens/:token*?', function(req, res) {
   });	
 
 /**
- * Switch up the keys at 3am every day
+ * Refresh this server's public/private keys at 3am every day
  */
 schedule.scheduleJob('0 3 * * *', function() {
 	console.log('change server\'s ephemeral keypair');
