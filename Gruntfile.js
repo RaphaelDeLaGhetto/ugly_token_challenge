@@ -1,23 +1,13 @@
 'use strict';
+//require('./index');
 
-var	port = process.env.PORT || 3333;
+var port = process.env.PORT || 3333;
 
 module.exports = function(grunt) {
 
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
-
-        /**
-         * connect
-         */
-        connect: {
-            server: {
-                options: {
-                    port: port,
-                }
-            }
-        },
 
         /**
          * jasmine_node
@@ -29,9 +19,9 @@ module.exports = function(grunt) {
                 match: '.',
                 matchall: false,
                 extensions: 'js',
-                specNameMatcher: 'spec'
+                specNameMatcher: '[sS]pec'
             },
-            all: ['spec/']
+            all: []
         },
 
         /**
@@ -56,7 +46,6 @@ module.exports = function(grunt) {
     /**
      * Load the plugins
      */
-    grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-jasmine-node');
     grunt.loadNpmTasks('grunt-contrib-jshint');
 
@@ -68,5 +57,5 @@ module.exports = function(grunt) {
     /**
      * Jasmine unit tests
      */
-    grunt.registerTask('test', ['connect','jasmine_node']);
+    grunt.registerTask('test', ['jasmine_node']);
 };
