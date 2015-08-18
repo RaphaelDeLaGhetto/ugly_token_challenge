@@ -18,6 +18,7 @@ development) environment.
 - Declared _strict mode_
 - Ensured tokens containing slashes don't break the routes
 - Fixed private/public key refresh to execute once everyday at 3am
+- Server request logging
 
 # Update the OS
 

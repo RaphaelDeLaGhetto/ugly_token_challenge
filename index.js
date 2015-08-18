@@ -11,6 +11,7 @@ var express = require('express'),
 	port = process.env.PORT || 3333,
 	app = express(),
     Base58 = require(path.join(__dirname, 'lib', 'base58')),
+    morgan = require('morgan'),
     nacl = require('tweetnacl/nacl-fast'),
     bodyParser = require('body-parser'),
     redis = require('redis').createClient(),
@@ -33,6 +34,7 @@ redis.on('connect', function() {
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
     app.use('/api', router);
+    app.use(morgan('combined'));
     keys.public = crypto.getPublicKeyString(keyPair.publicKey);
     keys.private = nacl.util.encodeBase64(keyPair.secretKey);
   });
