@@ -9,6 +9,7 @@
     "body-parser": "latest",
     "express": "latest",
     "lodash": "latest",
+    "morgan": "^1.6.1",
     "node-schedule": "latest",
     "redis": "^0.12.1",
     "scrypt": "latest",
