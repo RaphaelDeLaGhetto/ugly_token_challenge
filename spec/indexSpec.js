@@ -105,6 +105,31 @@ describe('Generating tokens', function() {
 		    done();
 	  	});
 	});
+
+	it('should use the specified API version', function(done) {
+	  	request('http://localhost:' + port + '/api/v1/generate/' + myPublicKeyString, function(error, response, body){
+
+            // Ensure no errors were returned
+            expect(error).toBeNull();
+    		expect(response.statusCode).toEqual(200);
+
+            // This try/catch ensures that the response body is JSON.
+            // Tests will not proceed if an exception is thrown here.
+            if (response) {
+              try {
+  		  	    var b = JSON.parse(response.body);
+    		  	tokens = b.tokens; 
+    		  	serverPublicKey = b.ephemeralServerPublicKey;
+    		    expect(tokens.length).toEqual(10);
+              }
+              catch(err) {
+                console.log('JSON parse failed', err);
+                expect(true).toBe(false);
+              }
+            }
+		    done();
+	  	});
+	});
 });
 
 /**

@@ -19,7 +19,7 @@ var express = require('express'),
 	//httpServer = http.createServer(app),
 	keys = {},
 	keyPair = nacl.box.keyPair(), 
-	router = express.Router();
+	v1 = express.Router();
 
 /**
  * Don't start listening until the database is ready
@@ -33,7 +33,8 @@ redis.on('connect', function() {
     app.listen(port);
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
-    app.use('/api', router);
+    app.use('/api/v1', v1);
+    app.use('/api', v1);
     app.use(morgan('combined'));
     keys.public = crypto.getPublicKeyString(keyPair.publicKey);
     keys.private = nacl.util.encodeBase64(keyPair.secretKey);
@@ -75,7 +76,7 @@ var generateToken = function () {
 /**
  * Track publicKey usage
  */
-router.param('publicKey', function(req, res, next) {
+v1.param('publicKey', function(req, res, next) {
 	var publicKey = req.params.publicKey;
     if (publicKey) {
       redis.incr('usage:' + publicKey, function(err, res) {
@@ -92,7 +93,7 @@ router.param('publicKey', function(req, res, next) {
  *
  * GET /api/generate/:publicKey
  */
-router.get('/generate/:publicKey', function(req, res) {
+v1.get('/generate/:publicKey', function(req, res) {
 	var publicKey = req.params.publicKey,
 		tokens = [], 
 		encryptedTokens = [];
@@ -115,7 +116,7 @@ router.get('/generate/:publicKey', function(req, res) {
  *
  * POST /api/tokens/:token
  */
-router.post('/tokens/:token*?', function(req, res) {
+v1.post('/tokens/:token*?', function(req, res) {
 
     // The tokens sometimes contain forward slashes.
     // This messes up routing. Here, everything following

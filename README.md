@@ -19,6 +19,7 @@ development) environment.
 - Ensured tokens containing slashes don't break the routes
 - Fixed private/public key refresh to execute once everyday at 3am
 - Server request logging
+- Set the stage for API versioning
 
 # Update the OS
 
