@@ -21,18 +21,58 @@ development) environment.
 - Server request logging
 - Set the stage for API versioning
 
-# Update the OS
+# Prepare the server environment
 
-The following instructions pertain to Ubuntu 14.04.
+The following instructions pertain to a server running Ubuntu 14.04. It assumes a basic install with SSH access and a _root_ user. Login as appropriate...
+
+## Add a user account
+
+You don't want to run everything as _root_, so create a new user.
+
+```
+sudo adduser deploy
+sudo adduser deploy sudo
+su deploy
+```
+
+## Update the OS
 
 ```
 sudo apt-get update
 sudo apt-get upgrade
 ```
 
+## Install Docker
+
+Docker is used, wherever possible, to set up the server environment. These instructions are adapted from [here](http://docs.docker.com/linux/started/).
+
+```
+wget -qO- https://get.docker.com/ | sh
+```
+
+Once installed, Docker helpfully suggests you allow the _deploy_ user to execute Docker commands without prefixing `sudo`.
+
+```
+sudo usermod -aG docker deploy
+```
+
+Having done this, logout and log back in as the _deploy_ user for the change to take effect.
+
+Docker should start automatically, but likely didn't. To be sure, execute:
+
+```
+sudo service docker restart
+```
+
+Now verify that `docker` is installed correctly;
+
+```
+docker run hello-world
+```
+
 # Setting the stage
 
-This project has a number of production/development environment dependencies...
+This project has a number of production/development environment dependencies, most of which are deployed with Docker.
 
 ## Redis
 
