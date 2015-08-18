@@ -5,18 +5,17 @@
   "private": true,
   "author": "FHV",
   "dependencies": {
+    "blake2s-js": "latest",
     "body-parser": "latest",
     "express": "latest",
     "lodash": "latest",
-    "node-redis": "latest",
     "node-schedule": "latest",
-    "tweetnacl": "latest",
-    "blake2s-js": "latest",
-    "scrypt": "latest"
+    "redis": "^0.12.1",
+    "scrypt": "latest",
+    "tweetnacl": "latest"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
-    "grunt-contrib-connect": "^0.11.2",
     "grunt-contrib-jshint": "^0.11.2",
     "grunt-jasmine-node": "^0.3.1",
     "jasmine-node": "latest",
@@ -26,6 +25,6 @@
     "node": "0.10.x"
   },
   "scripts": {
-    "test": "jasmine-node spec"
+    "test": "grunt test"
   }
 }
