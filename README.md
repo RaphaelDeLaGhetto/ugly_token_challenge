@@ -70,6 +70,20 @@ Now verify that `docker` is installed correctly;
 docker run hello-world
 ```
 
+### Docker cheatsheet
+
+```
+docker images               # show locally stored images
+docker ps                   # show running containers
+docker login                # authenticate
+docker build -t my-image    # build image from Dockerfile in current directory
+docker tag IMAGE_ID mydockeracct/my-image:latest # tag the image
+docker push                 # push tagged image to repository
+docker rmi -f my-image      # remove an image
+docker pull mydockeracct/my-image # download an image
+docker run my-image         # load image into new container
+```
+
 # Setting the stage
 
 This project has a number of production/development environment dependencies, most of which are deployed with Docker.
