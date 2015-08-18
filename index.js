@@ -23,6 +23,10 @@ var express = require('express'),
 /**
  * Don't start listening until the database is ready
  */
+redis.on('error', function() {
+    console.log('could not connect to redis');
+  });
+
 redis.on('connect', function() {
     console.log('redis connected');
     app.listen(port);
@@ -70,7 +74,6 @@ var generateToken = function () {
  * Track publicKey usage
  */
 router.param('publicKey', function(req, res, next) {
-    // New
 	var publicKey = req.params.publicKey;
     if (publicKey) {
       redis.incr('usage:' + publicKey, function(err, res) {
@@ -80,13 +83,6 @@ router.param('publicKey', function(req, res, next) {
     else {
       next();
     }
-
-    // Test to ensure usage:publicKey gets set
-    // Problem caught by jshint (publicKey is not defined
-//    if (req.params.publicKey) {
-//    	redis.incr('usage:' + publicKey);
-//    }
-//    next(); 
 });
 
 /**
@@ -98,6 +94,7 @@ router.get('/generate/:publicKey', function(req, res) {
 	var publicKey = req.params.publicKey,
 		tokens = [], 
 		encryptedTokens = [];
+
 	for (var i=0; i<10; i++) {
       var token = generateToken();
       tokens.push(token);
@@ -118,10 +115,11 @@ router.get('/generate/:publicKey', function(req, res) {
  */
 router.post('/tokens/:token*?', function(req, res) {
 
-    // The tokens provided sometimes contain forward slashes.
+    // The tokens sometimes contain forward slashes.
     // This messes up routing. Here, everything following
-    // a slash is treated as parameters and then appended
-    // to the value assigned to the token parameter.
+    // a slash is treated as splat-like parameters and
+    // then appended to the value assigned to the token
+    // parameter.
     var decryptedToken = req.params.token + req.params[0];
 
     var publicKey = req.body.publicKey;
@@ -137,7 +135,10 @@ router.post('/tokens/:token*?', function(req, res) {
     });
   });	
 
-schedule.scheduleJob('* 3 * * *', function() {
+/**
+ * Switch up the keys at 3am every day
+ */
+schedule.scheduleJob('0 3 * * *', function() {
 	console.log('change server\'s ephemeral keypair');
 
 	keys.public = crypto.getPublicKeyString(keyPair.publicKey);
