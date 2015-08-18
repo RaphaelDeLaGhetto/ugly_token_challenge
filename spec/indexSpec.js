@@ -175,7 +175,7 @@ describe('Validating tokens', function() {
           if (/\//.test(validDecryptedToken)) {
             break;
           }
-        };
+        }
         expect(/\//.test(validDecryptedToken)).toBe(true);
 
 		request({ uri: 'http://localhost:' + port + '/api/tokens/' + validDecryptedToken,
