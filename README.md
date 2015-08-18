@@ -72,6 +72,8 @@ docker run hello-world
 
 ### Docker cheatsheet
 
+Some useful `docker` commands:
+
 ```
 docker images               # show locally stored images
 docker ps                   # show running containers
