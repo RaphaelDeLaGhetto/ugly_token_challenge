@@ -13,21 +13,30 @@ var express = require('express'),
     Base58 = require(path.join(__dirname, 'lib', 'base58')),
     nacl = require('tweetnacl/nacl-fast'),
     bodyParser = require('body-parser'),
-    redis = require('node-redis').createClient(),
+    redis = require('redis').createClient(),
     // Not used (yet...)
 	//httpServer = http.createServer(app),
 	keys = {},
 	keyPair = nacl.box.keyPair(), 
-	router = express.Router();  
+	router = express.Router();
 
-app.listen(port);
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use('/api', router);
-keys.public = crypto.getPublicKeyString(keyPair.publicKey);
-keys.private = nacl.util.encodeBase64(keyPair.secretKey);
+/**
+ * Don't start listening until the database is ready
+ */
+redis.on('connect', function() {
+    console.log('redis connected');
+    app.listen(port);
+    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.json());
+    app.use('/api', router);
+    keys.public = crypto.getPublicKeyString(keyPair.publicKey);
+    keys.private = nacl.util.encodeBase64(keyPair.secretKey);
+  });
 
 
+/**
+ *
+ */
 var encryptToken = function (token, userPublicKeyString) {
 	var nonce = nacl.randomBytes(24);
 	var userBytes = new Uint8Array(Base58.decode(userPublicKeyString));
@@ -45,6 +54,9 @@ var encryptToken = function (token, userPublicKeyString) {
 	};
 };
 
+/**
+ *
+ */
 var generateToken = function () {
 	var token = new Uint8Array(32);
 
@@ -54,17 +66,22 @@ var generateToken = function () {
 	return nacl.util.encodeBase64(token);
 };
 
-
-// track
-router.use(function(req, res, next) {
-
+/**
+ * Track publicKey usage
+ */
+router.param('publicKey', function(req, res, next) {
     // New
 	var publicKey = req.params.publicKey;
     if (publicKey) {
-    	redis.incr('usage:' + publicKey);
+      redis.incr('usage:' + publicKey, function(err, res) {
+          next();
+        });
     }
-    next();
+    else {
+      next();
+    }
 
+    // Test to ensure usage:publicKey gets set
     // Problem caught by jshint (publicKey is not defined
 //    if (req.params.publicKey) {
 //    	redis.incr('usage:' + publicKey);
@@ -72,37 +89,53 @@ router.use(function(req, res, next) {
 //    next(); 
 });
 
+/**
+ * Get ten encrypted tokens
+ *
+ * GET /api/generate/:publicKey
+ */
 router.get('/generate/:publicKey', function(req, res) {
 	var publicKey = req.params.publicKey,
 		tokens = [], 
 		encryptedTokens = [];
-
 	for (var i=0; i<10; i++) {
-		var token = generateToken();
-		tokens.push(token);
-		redis.set(token, publicKey);
-		encryptedTokens.push(encryptToken(token, publicKey));
+      var token = generateToken();
+      tokens.push(token);
+      redis.set(token, publicKey);
+      encryptedTokens.push(encryptToken(token, publicKey));
 	}
+
 	res.status(200).json({ 
-		tokens: encryptedTokens
-	});
+        tokens: encryptedTokens
+	  });
 });
 
 
-// check validity of a token
-router.post('/tokens/:token', function(req, res) {
-      	var decryptedToken = req.params.token;  
-      	var publicKey = req.body.publicKey;
+/**
+ * Check validity of a token
+ *
+ * POST /api/tokens/:token
+ */
+router.post('/tokens/:token*?', function(req, res) {
 
-        redis.get(decryptedToken, function(err, val) {
-        	if (val && val.toString() === publicKey) {
-        		res.status(200).json({ status: 'ok' });
-        	} else {
-        		res.status(500).json({ error: 'error' });
-        	}
-        	redis.del(decryptedToken);
-        });
-    });	
+    // The tokens provided sometimes contain forward slashes.
+    // This messes up routing. Here, everything following
+    // a slash is treated as parameters and then appended
+    // to the value assigned to the token parameter.
+    var decryptedToken = req.params.token + req.params[0];
+
+    var publicKey = req.body.publicKey;
+
+    redis.get(decryptedToken, function(err, val) {
+    	if (val && val.toString() === publicKey) {
+          res.status(200).json({ status: 'ok' });
+    	}
+        else {
+          res.status(500).json({ error: 'error' });
+    	}
+    	redis.del(decryptedToken);
+    });
+  });	
 
 schedule.scheduleJob('* 3 * * *', function() {
 	console.log('change server\'s ephemeral keypair');
