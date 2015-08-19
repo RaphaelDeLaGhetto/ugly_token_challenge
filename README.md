@@ -14,7 +14,6 @@ development) environment.
     - Testing
         - jasmine-node
         - Expanded coverage to account for public key usage and ugly tokens
-    - Deployment
 - Declared _strict mode_
 - Ensured tokens containing slashes don't break the routes
 - Fixed private/public key refresh to execute once everyday at 3am
@@ -23,7 +22,8 @@ development) environment.
 
 # Prepare the server environment
 
-The following instructions pertain to a server running Ubuntu 14.04. It assumes a basic install with SSH access and a _root_ user. Login as appropriate...
+The following instructions pertain to a server running Ubuntu 14.04. It assumes
+a basic install with SSH access and a _root_ user. Login as appropriate...
 
 ## Add a user account
 
@@ -44,24 +44,27 @@ sudo apt-get upgrade
 
 ## Install Docker
 
-Docker is used, wherever possible, to set up the server environment. These instructions are adapted from [here](http://docs.docker.com/linux/started/).
+Docker is used to deploy the required system components. These install
+instructions are adapted from [here](http://docs.docker.com/linux/started/).
 
 ```
 wget -qO- https://get.docker.com/ | sh
 ```
 
-Once installed, Docker helpfully suggests you allow the _deploy_ user to execute Docker commands without prefixing `sudo`.
+Once installed, Docker helpfully suggests you allow the _deploy_ user to execute
+Docker commands without prefixing `sudo`.
 
 ```
 sudo usermod -aG docker deploy
 ```
 
-Having done this, logout and log back in as the _deploy_ user for the change to take effect.
+Having done this, logout and log back in as the _deploy_ user for the change to
+take effect.
 
-Docker should start automatically, but likely didn't. To be sure, execute:
+Docker should start automatically, but if it didn't (`status docker`), execute:
 
 ```
-sudo service docker restart
+sudo service docker start
 ```
 
 Now verify that `docker` is installed correctly;
@@ -78,7 +81,7 @@ Some useful `docker` commands:
 docker images               # show locally stored images
 docker ps                   # show running containers
 docker login                # authenticate
-docker build -t my-image    # build image from Dockerfile in current directory
+docker build -t my-image .  # build image from Dockerfile in current directory
 docker tag IMAGE_ID mydockeracct/my-image:latest # tag the image
 docker push                 # push tagged image to repository
 docker rmi -f my-image      # remove an image
@@ -86,9 +89,65 @@ docker pull mydockeracct/my-image # download an image
 docker run my-image         # load image into new container
 ```
 
-# Setting the stage
+# Deploy Docker containers
 
-This project has a number of production/development environment dependencies, most of which are deployed with Docker.
+The system topology is comprised of Nginx, Redis, and any number of
+`ugly_token_challenge` instances.
+
+![Ugly Topology](http://anandmanisankar.com/assets/images/DockerSample.png)
+
+_NOTE:_ The following will likely be automated using Docker _Compose_ when it
+is deemed [ready for production](https://docs.docker.com/compose/).
+
+## Redis
+
+```
+docker run --restart=always -d --name redis -p 6379:6379 redis
+```
+
+## Nginx
+
+### First, get an SSL certificate
+
+This can be self-signed or obtained from a Certificate Authority. To self-sign
+a certificate, execute the following:
+
+```
+mkdir certs
+cd certs
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout sub.example.com.key -out sub.example.com.crt
+chmod 600 -R .
+```
+
+Note the `keyout` and `out` options. The `jwilder/nginx-proxy` Docker image 
+won't pick up the certificates unless they are named in accordance with the 
+production site's URL and subdomain (if any). For example, if you have a
+certificate for www.example.com, the `keyout` and `out` options must be
+named _www.example.com.key_ and _www.example.com.crt_ respectively.
+
+### Then, run the Nginx docker image
+
+```
+docker run --restart=always -d -p 80:80 -p 443:443 -v /home/deploy/certs:/etc/nginx/certs -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy
+```
+
+## ugly-token-challenge
+
+```
+docker run --restart=always -e VIRTUAL_HOST=localhost --name ugly --link redis:redis ugly-token-challenge
+```
+
+# Developing ugly_token_challenge
+
+This section provides instruction on how to prepare your development
+environment. Again, this assumes an Ubuntu 14.04 installation.
+
+## Update the OS
+
+```
+sudo apt-get update
+sudo apt-get upgrade
+```
 
 ## Redis
 
@@ -175,11 +234,29 @@ This is required for building, testing, and deploying the
 npm install -g grunt-cli
 ```
 
+## Clone the repository
 
+```
+git clone https://github.com/RaphaelDeLaGhetto/ugly_token_challenge.git
+cd ugly_token_challenge
+```
 
+Once downloaded, install `npm` modules:
 
+```
+npm install
+```
 
+### Test
 
-Install Redis, node, npm. 
+All tests must pass:
 
-To run `node index.js`. To run tests `jasmine`. 
+```
+grunt test
+```
+
+### Execute
+
+```
+node index.js
+```
