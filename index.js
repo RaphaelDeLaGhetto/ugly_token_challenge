@@ -10,7 +10,9 @@ var express = require('express'),
     morgan = require('morgan'),
     nacl = require('tweetnacl/nacl-fast'),
     bodyParser = require('body-parser'),
-    redis = require('redis').createClient('6379', 'redis'),
+    parseArgs = require('minimist'),
+    argv = parseArgs(process.argv),
+    redis = require('redis').createClient(argv.p || '6379', argv.h || '127.0.0.1'),
 	keys = {},
 	keyPair = nacl.box.keyPair(), 
 	v1 = express.Router();
@@ -18,8 +20,8 @@ var express = require('express'),
 /**
  * Don't start listening until the database is ready
  */
-redis.on('error', function() {
-    console.log('could not connect to redis');
+redis.on('error', function(err) {
+    console.log('could not connect to redis', err);
   });
 
 redis.on('connect', function() {
@@ -64,7 +66,7 @@ var encryptToken = function (token, userPublicKeyString) {
 		nonce: nacl.util.encodeBase64(nonce),
 		ephemeralServerPublicKey: keys.public
 	};
-};
+  };
 
 /**
  * Generate a Base64-encoded 2-byte prefixed array appended with 30 pseudo-random bytes
@@ -78,7 +80,7 @@ var generateToken = function () {
 	token[1] = 0x54;
 	token.set(nacl.randomBytes(30), 2);
 	return nacl.util.encodeBase64(token);
-};
+  };
 
 /**
  * Route middleware for tracking publicKey usage. Incremement by one for every
@@ -96,7 +98,7 @@ v1.param('publicKey', function(req, res, next) {
     else {
       next();
     }
-});
+  });
 
 /**
  * Get ten encrypted tokens
@@ -120,7 +122,7 @@ v1.get('/generate/:publicKey', function(req, res) {
 	res.status(200).json({ 
         tokens: encryptedTokens
 	  });
-});
+  });
 
 
 /**
@@ -160,5 +162,5 @@ schedule.scheduleJob('0 3 * * *', function() {
 
 	keys.public = crypto.getPublicKeyString(keyPair.publicKey);
 	keys.private = nacl.util.encodeBase64(keyPair.secretKey);
-});
+  });
 
