@@ -2,8 +2,8 @@ ugly_token_challenge
 ====================
 
 A programming exercise submitted to [peerio.com](http://peerio.com). This
-document describes how to deploy the product into a production (and
-development) environment.
+document describes how to deploy the product into production and setup a
+development environment.
 
 ## Overview of enhancements
 
@@ -19,6 +19,7 @@ development) environment.
 - Fixed private/public key refresh to execute once everyday at 3am
 - Server request logging
 - Set the stage for API versioning
+- Deployed the project as a Docker image with automatic builds from GitHub
 
 # Prepare the server environment
 
@@ -134,15 +135,15 @@ docker run --restart=always -d -p 80:80 -p 443:443 -v /home/deploy/certs:/etc/ng
 ## raphaeldelaghetto/ugly_token_challenge
 
 ```
-docker run --restart=always -d -e VIRTUAL_HOST=localhost --name ugly --link redis:redis raphaeldelaghetto/ugly_token_challenge
+docker run --restart=always -d --expose 3331 -e VIRTUAL_HOST=www.example.com -e PORT=3331 --name ugly --link redis:redis raphaeldelaghetto/ugly_token_challenge
 ```
 
 Any number of `ugly_token_challenge` images can be deployed. Just be sure to 
-provide each one with a unique name. For example:
+provide each one with a unique name and port. For example:
 
 ```
-docker run --restart=always -d -e VIRTUAL_HOST=localhost --name ugly1 --link redis:redis raphaeldelaghetto/ugly_token_challenge
-docker run --restart=always -d -e VIRTUAL_HOST=localhost --name ugly2 --link redis:redis raphaeldelaghetto/ugly_token_challenge
+docker run --restart=always -d --expose 3332 -e VIRTUAL_HOST=www.example.com -e PORT=3332 --name ugly1 --link redis:redis raphaeldelaghetto/ugly_token_challenge
+docker run --restart=always -d --expose 3333 -e VIRTUAL_HOST=www.example.com -e PORT=3333 --name ugly2 --link redis:redis raphaeldelaghetto/ugly_token_challenge
 ```
 
 # Developing ugly_token_challenge
