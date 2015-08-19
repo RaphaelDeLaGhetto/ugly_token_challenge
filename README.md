@@ -131,18 +131,18 @@ named _www.example.com.key_ and _www.example.com.crt_ respectively.
 docker run --restart=always -d -p 80:80 -p 443:443 -v /home/deploy/certs:/etc/nginx/certs -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy
 ```
 
-## ugly-token-challenge
+## raphaeldelaghetto/ugly_token_challenge
 
 ```
-docker run --restart=always -e VIRTUAL_HOST=localhost --name ugly --link redis:redis ugly-token-challenge
+docker run --restart=always -d -e VIRTUAL_HOST=localhost --name ugly --link redis:redis raphaeldelaghetto/ugly_token_challenge
 ```
 
-Any number of `ugly-token-challenge` images can be deployed. Just be sure to 
+Any number of `ugly_token_challenge` images can be deployed. Just be sure to 
 provide each one with a unique name. For example:
 
 ```
-docker run --restart=always -e VIRTUAL_HOST=localhost --name ugly1 --link redis:redis ugly-token-challenge
-docker run --restart=always -e VIRTUAL_HOST=localhost --name ugly2 --link redis:redis ugly-token-challenge
+docker run --restart=always -d -e VIRTUAL_HOST=localhost --name ugly1 --link redis:redis raphaeldelaghetto/ugly_token_challenge
+docker run --restart=always -d -e VIRTUAL_HOST=localhost --name ugly2 --link redis:redis raphaeldelaghetto/ugly_token_challenge
 ```
 
 # Developing ugly_token_challenge
