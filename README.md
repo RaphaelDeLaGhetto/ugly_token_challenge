@@ -117,7 +117,9 @@ a certificate, execute the following:
 mkdir certs
 cd certs
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout sub.example.com.key -out sub.example.com.crt
-chmod 600 -R .
+cd ..
+sudo chown -R root:root certs 
+sudo chmod -R 600 certs 
 ```
 
 Note the `keyout` and `out` options. The `jwilder/nginx-proxy` Docker image 
