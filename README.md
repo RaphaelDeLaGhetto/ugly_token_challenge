@@ -126,7 +126,7 @@ Note the `keyout` and `out` options. The `jwilder/nginx-proxy` Docker image
 won't pick up the certificates unless they are named in accordance with the 
 production site's URL and subdomain (if any). For example, if you have a
 certificate for www.example.com, the `keyout` and `out` options must be
-named _www.example.com.key_ and _www.example.com.crt_ respectively.
+named `www.example.com.key` and `www.example.com.crt` respectively.
 
 ### Then, run the Nginx docker image
 
