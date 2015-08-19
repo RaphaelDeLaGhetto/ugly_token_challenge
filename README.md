@@ -137,6 +137,14 @@ docker run --restart=always -d -p 80:80 -p 443:443 -v /home/deploy/certs:/etc/ng
 docker run --restart=always -e VIRTUAL_HOST=localhost --name ugly --link redis:redis ugly-token-challenge
 ```
 
+Any number of `ugly-token-challenge` images can be deployed. Just be sure to 
+provide each one with a unique name. For example:
+
+```
+docker run --restart=always -e VIRTUAL_HOST=localhost --name ugly1 --link redis:redis ugly-token-challenge
+docker run --restart=always -e VIRTUAL_HOST=localhost --name ugly2 --link redis:redis ugly-token-challenge
+```
+
 # Developing ugly_token_challenge
 
 This section provides instruction on how to prepare your development
