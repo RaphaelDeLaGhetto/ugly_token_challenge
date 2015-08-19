@@ -28,6 +28,6 @@
   },
   "scripts": {
     "test": "grunt test",
-    "start": "node index.js"
+    "start": "node index.js -p 6379 -h redis"
   }
 }
