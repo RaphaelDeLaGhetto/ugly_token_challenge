@@ -136,6 +136,8 @@ docker run --restart=always -d -p 80:80 -p 443:443 -v /home/deploy/certs:/etc/ng
 
 ## raphaeldelaghetto/ugly_token_challenge
 
+Be sure to replace `www.example.com` with your domain.
+
 ```
 docker run --restart=always -d --expose 3331 -e VIRTUAL_HOST=www.example.com -e PORT=3331 --name ugly --link redis:redis raphaeldelaghetto/ugly_token_challenge
 ```
